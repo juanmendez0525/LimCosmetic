@@ -3337,6 +3337,11 @@ async function renderApartados() {
           </p>
 
         </div>
+        
+        <button class="quick-btn btn-crear-apartado" onclick="openApartadoModal()">
+          <b>＋ Crear apartado</b>
+        </button>
+
 
       </div>
 

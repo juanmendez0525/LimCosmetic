@@ -39,7 +39,8 @@ async function cargarVentasDesdeSupabase() {
       subtotal,
       descuento,
       total,
-      estado
+      estado,
+      usuario_id
     `)
     .order("fecha", { ascending: false });
 
@@ -340,6 +341,63 @@ async function renderReportes() {
       mesSeleccionado
     );
   });
+
+  
+  // ==========================================
+  // RESUMEN DE VENTAS POR VENDEDOR
+  // ==========================================
+
+  const resumenPorVendedor = {};
+
+  ventasDelMes.forEach(venta => {
+    // Ignorar ventas sin vendedor asociado
+    if (!venta.usuario_id) return;
+
+    if (!resumenPorVendedor[venta.usuario_id]) {
+      resumenPorVendedor[venta.usuario_id] = {
+        cantidad: 0,
+        total: 0
+      };
+    }
+
+    resumenPorVendedor[venta.usuario_id].cantidad++;
+    resumenPorVendedor[venta.usuario_id].total +=
+      Number(venta.total || 0);
+  });
+
+  const idsVendedores = Object.keys(resumenPorVendedor);
+
+  let nombresVendedores = {};
+
+  if (idsVendedores.length > 0) {
+    const { data: perfiles, error: errorPerfiles } =
+      await supabaseClient
+        .from("perfiles")
+        .select("id, nombre")
+        .in("id", idsVendedores);
+
+    if (errorPerfiles) {
+      console.error(
+        "Error cargando nombres de vendedores:",
+        errorPerfiles
+      );
+    } else {
+      (perfiles || []).forEach(perfil => {
+        nombresVendedores[perfil.id] =
+          perfil.nombre || "Vendedor sin nombre";
+      });
+    }
+  }
+
+  const filasVendedores = idsVendedores
+    .map(id => ({
+      id,
+      nombre: nombresVendedores[id] || "Vendedor sin nombre",
+      cantidad: resumenPorVendedor[id].cantidad,
+      total: resumenPorVendedor[id].total
+    }))
+    .sort((a, b) => b.total - a.total);
+
 
 
   let totalVentas = 0;
@@ -1117,6 +1175,86 @@ const gananciaBruta =
 
 
       </div>
+
+      
+      <!-- ======================================
+           VENTAS POR VENDEDOR
+           ====================================== -->
+
+      <div class="card mt">
+
+        <div class="section-head">
+          <div>
+            <h3>Ventas por vendedor</h3>
+            <p class="muted">
+              Total vendido en ${nombreMesReporte(mesSeleccionado)}
+            </p>
+          </div>
+        </div>
+
+        <div style="
+          max-height:320px;
+          overflow-y:auto;
+          overflow-x:auto;
+          border:1px solid var(--border);
+          border-radius:10px;
+        ">
+
+          ${
+            filasVendedores.length
+              ? `
+                <table style="
+                  width:100%;
+                  border-collapse:collapse;
+                  min-width:420px;
+                ">
+                  <thead style="
+                    position:sticky;
+                    top:0;
+                    background:var(--soft);
+                    z-index:1;
+                  ">
+                    <tr>
+                      <th style="padding:12px;text-align:left;">
+                        Vendedor
+                      </th>
+                      <th style="padding:12px;text-align:center;">
+                        Ventas
+                      </th>
+                      <th style="padding:12px;text-align:right;">
+                        Total vendido
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    ${filasVendedores.map(vendedor => `
+                      <tr style="border-top:1px solid var(--border);">
+                        <td style="padding:12px;">
+                          ${vendedor.nombre}
+                        </td>
+                        <td style="padding:12px;text-align:center;">
+                          ${vendedor.cantidad}
+                        </td>
+                        <td style="padding:12px;text-align:right;font-weight:600;">
+                          ${money(vendedor.total)}
+                        </td>
+                      </tr>
+                    `).join("")}
+                  </tbody>
+                </table>
+              `
+              : `
+                <div class="empty">
+                  No hay ventas registradas para vendedores
+                  en este mes.
+                </div>
+              `
+          }
+
+        </div>
+      </div>
+
 
 
     </div>

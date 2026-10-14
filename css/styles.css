@@ -730,4 +730,22 @@ th,td{padding:12px 10px;border-bottom:1px solid var(--border);white-space:nowrap
     width: 100%;
   }
 }
+.btn-crear-apartado {
+  background: #88456c;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
 
+.btn-crear-apartado:hover {
+  background: #8e5576;
+  transform: translateY(-2px);
+}
+
+.btn-crear-apartado b {
+  color: inherit;
+}
