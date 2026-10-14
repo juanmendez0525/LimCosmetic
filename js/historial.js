@@ -484,9 +484,11 @@ if (usuarioIds.length > 0) {
     data: perfilesData,
     error: errorPerfiles
   } = await supabaseClient
-    .from("perfiles")
-    .select("id, nombre")
-    .in("id", usuarioIds);
+    
+  .from("perfiles")
+  .select("id, nombre, identificacion")
+  .in("id", idsVendedores);
+
 
   console.log(
     "Usuarios de las ventas:",

@@ -300,9 +300,33 @@ async function cargarResumenInicio() {
   };
 }
 
+async function cargarNombreBienvenida() {
+  const usuarioId = window.usuarioActual?.id;
+  const elemento = document.getElementById("nombreBienvenida");
+
+  if (!usuarioId || !elemento) return;
+
+  const { data, error } = await supabaseClient
+    .from("perfiles")
+    .select("nombre")
+    .eq("id", usuarioId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error cargando nombre de bienvenida:", error);
+    return;
+  }
+
+  if (data?.nombre) {
+    elemento.textContent = data.nombre;
+  }
+}
+
+
 async function renderInicio() {
 
   const rol = window.perfilActual?.rol;
+  const nombreUsuario = window.perfilActual?.nombre || "";
 
   const esAdmin = rol === "administrador";
 
@@ -479,9 +503,11 @@ async function renderInicio() {
 
     <div class="hero">
 
+      
       <h2>
-        ¡Bienvenido! 👋
+        ¡Bienvenido! 👋 ${nombreUsuario ? nombreUsuario : ""}
       </h2>
+
 
       <p>
         Administra tus ventas, maquillaje
@@ -661,82 +687,64 @@ async function renderInicio() {
     </div>
   `;
 }
-function renderConfiguracion(){
 
-  const c = DB.configuracion;
+async function renderConfiguracion() {
+  const escapar = (valor) =>
+    String(valor ?? "").replace(/[&<>"']/g, caracter => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[caracter]));
 
-  return `
+  const { data: empleados, error } = await supabaseClient
+    .from("perfiles")
+    .select("id, nombre, identificacion, rol")
+    .eq("rol", "empleado")
+    .order("nombre", { ascending: true });
 
-    <!-- INFORMACIÓN DEL NEGOCIO -->
-    <div class="card">
+  if (error) {
+    console.error("Error cargando empleados:", error);
 
-      <h2>Información del negocio</h2>
-
-      <p class="small">
-        Estos datos aparecerán en los comprobantes.
-      </p>
-
-      <form id="settingsForm" class="mt">
-
-        <div class="form-grid">
-
-          <div class="field">
-            <label>Nombre del negocio</label>
-            <input
-              class="input"
-              name="negocio"
-              value="${c.negocio}"
-            >
+    return `
+      <div class="card">
+        <div class="section-head">
+          <div>
+            <h2>Empleados</h2>
+            <p class="small">
+              Administra las cuentas y los datos personales de los empleados.
+            </p>
           </div>
 
-          <div class="field">
-            <label>NIT</label>
-            <input
-              class="input"
-              name="nit"
-              value="${c.nit || ""}"
-            >
-          </div>
-
-          <div class="field">
-            <label>Teléfono</label>
-            <input
-              class="input"
-              name="telefono"
-              value="${c.telefono || ""}"
-            >
-          </div>
-
-          <div class="field">
-            <label>Dirección</label>
-            <input
-              class="input"
-              name="direccion"
-              value="${c.direccion || ""}"
-            >
-          </div>
-
+          <button
+            class="primary-btn"
+            onclick="openEmpleadoModal()"
+          >
+            + Crear empleado
+          </button>
         </div>
 
-        <button class="primary-btn mt">
-          Guardar cambios
-        </button>
+        <div class="empty mt">
+          No fue posible cargar los empleados.
+          <p class="small">
+            Revisa la consola para ver el error de Supabase.
+          </p>
+        </div>
+      </div>
+    `;
+  }
 
-      </form>
+  const lista = empleados || [];
 
-    </div>
-
-
-    <!-- EMPLEADOS -->
-    <div class="card mt">
+  return `
+    <div class="card">
 
       <div class="section-head">
-
         <div>
           <h2>Empleados</h2>
-
           <p class="small">
-            Administra las cuentas y datos personales de los empleados.
+            Administra las cuentas y los datos personales de los empleados.
           </p>
         </div>
 
@@ -746,27 +754,47 @@ function renderConfiguracion(){
         >
           + Crear empleado
         </button>
-
       </div>
 
-      <div class="empty mt">
+      ${
+        lista.length
+          ? `
+            <div class="table-wrap mt">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nombre completo</th>
+                    <th>Identificación</th>
+                    <th>Rol</th>
+                  </tr>
+                </thead>
 
-        <p>
-          Aún no se han cargado los empleados.
-        </p>
-
-        <p class="small">
-          Aquí aparecerán las cuentas de empleados
-          creadas por el administrador.
-        </p>
-
-      </div>
+                <tbody>
+                  ${lista.map(empleado => `
+                    <tr>
+                      <td>${escapar(empleado.nombre || "Sin nombre")}</td>
+                      <td>${escapar(empleado.identificacion || "—")}</td>
+                      <td>Empleado</td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>
+          `
+          : `
+            <div class="empty mt">
+              <p>Aún no hay empleados registrados.</p>
+              <p class="small">
+                Usa el botón «Crear empleado» para agregar el primero.
+              </p>
+            </div>
+          `
+      }
 
     </div>
-
-
   `;
 }
+
 async function cerrarSesion() {
 
     const confirmar = confirm(
@@ -1123,6 +1151,8 @@ async function guardarEmpleado() {
 
     toast("Empleado creado correctamente.");
     closeModal();
+      
+    await renderView("configuracion");
 
   } catch (error) {
     console.error(

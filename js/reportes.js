@@ -373,7 +373,7 @@ async function renderReportes() {
     const { data: perfiles, error: errorPerfiles } =
       await supabaseClient
         .from("perfiles")
-        .select("id, nombre")
+        .select("id, nombre, identificacion")
         .in("id", idsVendedores);
 
     if (errorPerfiles) {
@@ -382,21 +382,27 @@ async function renderReportes() {
         errorPerfiles
       );
     } else {
+      
       (perfiles || []).forEach(perfil => {
-        nombresVendedores[perfil.id] =
-          perfil.nombre || "Vendedor sin nombre";
+        nombresVendedores[perfil.id] = {
+          nombre: perfil.nombre || "Vendedor sin nombre",
+          identificacion: perfil.identificacion || "—"
+        };
       });
+
     }
   }
 
   const filasVendedores = idsVendedores
     .map(id => ({
       id,
-      nombre: nombresVendedores[id] || "Vendedor sin nombre",
+      nombre: nombresVendedores[id]?.nombre || "Vendedor sin nombre",
+      identificacion: nombresVendedores[id]?.identificacion || "—",
       cantidad: resumenPorVendedor[id].cantidad,
       total: resumenPorVendedor[id].total
     }))
     .sort((a, b) => b.total - a.total);
+
 
 
 
@@ -1215,9 +1221,14 @@ const gananciaBruta =
                     z-index:1;
                   ">
                     <tr>
+                      
                       <th style="padding:12px;text-align:left;">
                         Vendedor
                       </th>
+                      <th style="padding:12px;text-align:left;">
+                        Documento
+                      </th>
+
                       <th style="padding:12px;text-align:center;">
                         Ventas
                       </th>
@@ -1230,9 +1241,14 @@ const gananciaBruta =
                   <tbody>
                     ${filasVendedores.map(vendedor => `
                       <tr style="border-top:1px solid var(--border);">
+                        
                         <td style="padding:12px;">
                           ${vendedor.nombre}
                         </td>
+                        <td style="padding:12px;">
+                          ${vendedor.identificacion}
+                        </td>
+
                         <td style="padding:12px;text-align:center;">
                           ${vendedor.cantidad}
                         </td>
