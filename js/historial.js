@@ -622,6 +622,7 @@ async function verDetalleVenta(ventaId) {
       .select(`
         id,
         fecha,
+        cliente_id,
         subtotal,
         descuento,
         total,
@@ -716,10 +717,38 @@ async function verDetalleVenta(ventaId) {
   // CLIENTE
   // ==========================================
 
-  const cliente =
-    obtenerClienteVenta(
-      venta.notas
-    );
+  
+  // ==========================================
+  // CLIENTE
+  // ==========================================
+
+  let cliente = {
+    nombre: "Consumidor final",
+    telefono: "—",
+    direccion: "—"
+  };
+
+  if (venta.cliente_id) {
+    const { data: clienteData, error: errorCliente } =
+      await supabaseClient
+        .from("clientes")
+        .select("nombre, telefono, direccion")
+        .eq("id", venta.cliente_id)
+        .maybeSingle();
+
+    if (errorCliente) {
+      console.error("Error obteniendo cliente:", errorCliente);
+    }
+
+    if (clienteData) {
+      cliente = {
+        nombre: clienteData.nombre || "Consumidor final",
+        telefono: clienteData.telefono || "—",
+        direccion: clienteData.direccion || "—"
+      };
+    }
+  }
+
 
 
   // ==========================================
@@ -875,20 +904,22 @@ async function verDetalleVenta(ventaId) {
               INF. CLIENTE:
             </h3>
 
+            
             <p>
               Nombre:
-              ${cliente}
+              ${cliente.nombre}
             </p>
-
+              
             <p>
               Contacto:
-              —
+              ${cliente.telefono}
             </p>
-
+              
             <p>
               Dirección:
-              —
+              ${cliente.direccion}
             </p>
+
 
           </div>
 
