@@ -1329,9 +1329,9 @@ function showReceipt(sale) {
 
         <button
           class="secondary-btn"
-          onclick="window.print()"
+          onclick="descargarFacturaPDF('venta-${sale.id}')"
         >
-          🖨 Imprimir
+          📄 Descargar PDF
         </button>
 
         <button
@@ -1400,9 +1400,13 @@ function renderVentas(){
     document.getElementById("saleSearch")?.value || ""
   ).toLowerCase();
 
+
   const products = DB.productos.filter(
-    p => `${p.nombre} ${p.marca}`.toLowerCase().includes(q)
+    p =>
+      Number(p.stock || 0) > 0 &&
+      `${p.nombre} ${p.marca}`.toLowerCase().includes(q)
   );
+
 
   return `
     <div class="two-col grid ventas-layout">

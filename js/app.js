@@ -9,6 +9,67 @@ const viewMeta={
   configuracion:["Configuración","Datos básicos de tu negocio"],
   mas:["Más","Opciones adicionales"]
 };
+
+async function descargarFacturaPDF(nombreArchivo = "factura") {
+  const factura = document.getElementById("receipt");
+
+  if (!factura) {
+    toast("No se encontró el contenido de la factura.");
+    return;
+  }
+
+  if (typeof html2pdf === "undefined") {
+    toast("No se pudo cargar el generador de PDF.");
+    return;
+  }
+
+  try {
+    // Esperar a que carguen las imágenes de la factura.
+    const imagenes = Array.from(factura.querySelectorAll("img"));
+
+    await Promise.all(
+      imagenes.map(img => {
+        if (img.complete) return Promise.resolve();
+
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      })
+    );
+
+    await html2pdf()
+      .set({
+        margin: [8, 8, 8, 8],
+        filename: `${nombreArchivo}.pdf`,
+        image: {
+          type: "jpeg",
+          quality: 0.98
+        },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          scrollY: 0
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait"
+        },
+        pagebreak: {
+          mode: ["css", "legacy"],
+          avoid: ["tr", ".invoice-header", ".footer-section"]
+        }
+      })
+      .from(factura)
+      .save();
+
+  } catch (error) {
+    console.error("Error generando el PDF:", error);
+    toast("No se pudo descargar la factura en PDF.");
+  }
+}
 function openModal(title,content){
   document.getElementById("modalRoot").innerHTML=`<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><h2>${title}</h2><button class="close-btn" onclick="closeModal()">×</button></div>${content}</div></div>`;
 }
@@ -1151,7 +1212,7 @@ async function guardarEmpleado() {
 
     toast("Empleado creado correctamente.");
     closeModal();
-      
+
     await renderView("configuracion");
 
   } catch (error) {

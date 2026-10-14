@@ -781,9 +781,9 @@ async function verApartado(id) {
 
         <button
           class="secondary-btn"
-          onclick="window.print()"
+          onclick="descargarFacturaPDF('apartado-${apartado.id}')"
         >
-          🖨 Imprimir
+          📄 Descargar PDF
         </button>
 
         <button

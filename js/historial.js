@@ -484,10 +484,9 @@ if (usuarioIds.length > 0) {
     data: perfilesData,
     error: errorPerfiles
   } = await supabaseClient
-    
-  .from("perfiles")
-  .select("id, nombre, identificacion")
-  .in("id", idsVendedores);
+    .from("perfiles")
+    .select("id, nombre, identificacion")
+    .in("id", usuarioIds);
 
 
   console.log(
@@ -499,7 +498,8 @@ if (usuarioIds.length > 0) {
     "Perfiles devueltos por Supabase:",
     (perfilesData || []).map(p => ({
       id: p.id,
-      nombre: p.nombre
+      nombre: p.nombre,
+      identificacion: p.identificacion
     }))
   );
 
@@ -1096,9 +1096,9 @@ async function verDetalleVenta(ventaId) {
 
         <button
           class="secondary-btn"
-          onclick="imprimirVentaHistorial()"
+          onclick="descargarFacturaPDF('venta-${venta.id}')"
         >
-          🖨 Imprimir
+          📄 Descargar PDF
         </button>
 
 
