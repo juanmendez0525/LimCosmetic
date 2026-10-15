@@ -494,8 +494,8 @@ const gananciaBruta =
   // GANANCIA FINAL
   // ==========================================
 
-  const gananciaFinal =
-    gananciaBruta -
+  const DineroCaja =
+    totalVentas -
     salidasMes +
     entradasMes;
 
@@ -729,11 +729,11 @@ const gananciaBruta =
         <div class="stat-card">
 
           <div class="stat-label">
-            Ganancia final
+            Dinero en caja
           </div>
 
           <div class="stat-value">
-            ${money(gananciaFinal)}
+            ${money(DineroCaja)}
           </div>
 
           <div class="stat-extra">
