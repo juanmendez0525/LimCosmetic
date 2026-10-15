@@ -737,7 +737,7 @@ const gananciaBruta =
           </div>
 
           <div class="stat-extra">
-            Ventas − inversión − salidas + entradas
+            Ventas totales − salidas + entradas
           </div>
 
         </div>
