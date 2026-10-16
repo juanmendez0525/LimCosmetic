@@ -37,22 +37,45 @@ async function eliminarApartado(id) {
 
 async function cargarApartadosSupabase() {
 
+  
+  const esAdmin =
+    window.perfilActual?.rol === "administrador";
+
+  let consultaApartados = supabaseClient
+    .from("apartados")
+    .select(`
+      id,
+      cliente_id,
+      fecha,
+      fecha_limite,
+      total,
+      total_abonado,
+      saldo,
+      estado,
+      notas,
+      usuario_id
+    `);
+
+  // Los empleados solo consultan sus propios apartados.
+  if (!esAdmin) {
+    const usuarioId = window.perfilActual?.id;
+
+    if (!usuarioId) {
+      toast("No se pudo identificar al usuario actual");
+      return false;
+    }
+
+    consultaApartados = consultaApartados.eq(
+      "usuario_id",
+      usuarioId
+    );
+  }
+
   const { data: apartados, error: errorApartados } =
-    await supabaseClient
-      .from("apartados")
-      .select(`
-        id,
-        cliente_id,
-        fecha,
-        fecha_limite,
-        total,
-        total_abonado,
-        saldo,
-        estado,
-        notas,
-        usuario_id
-      `)
-      .order("fecha", { ascending: false });
+    await consultaApartados.order("fecha", {
+      ascending: false
+    });
+
 
   if (errorApartados) {
     console.error("Error cargando apartados:", errorApartados);
