@@ -827,6 +827,7 @@ async function renderConfiguracion() {
                     <th>Nombre completo</th>
                     <th>Identificación</th>
                     <th>Rol</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
 
