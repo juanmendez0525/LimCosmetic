@@ -3371,64 +3371,56 @@ async function renderApartados() {
     </div>
 
 
+
     <!-- =====================================
          ESTADÍSTICAS
     ====================================== -->
 
-    <div class="stats-grid grid">
+    ${
+      esAdmin
+        ? `
+          <div class="stats-grid grid">
 
-      <div class="card stat-card">
+            <div class="card stat-card">
+              <div class="stat-label">
+                Pendiente
+              </div>
+              <div class="stat-value">
+                ${pendientes.length}
+              </div>
+            </div>
 
-        <div class="stat-label">
-          Pendiente
-        </div>
+            <div class="card stat-card">
+              <div class="stat-label">
+                Pagado
+              </div>
+              <div class="stat-value">
+                ${pagados.length}
+              </div>
+            </div>
 
-        <div class="stat-value">
-          ${pendientes.length}
-        </div>
+            <div class="card stat-card">
+              <div class="stat-label">
+                Entregado
+              </div>
+              <div class="stat-value">
+                ${entregados.length}
+              </div>
+            </div>
 
-      </div>
+            <div class="card stat-card">
+              <div class="stat-label">
+                Saldo pendiente
+              </div>
+              <div class="stat-value">
+                ${money(saldoPendiente)}
+              </div>
+            </div>
 
-
-      <div class="card stat-card">
-
-        <div class="stat-label">
-          Pagado
-        </div>
-
-        <div class="stat-value">
-          ${pagados.length}
-        </div>
-
-      </div>
-
-
-      <div class="card stat-card">
-
-        <div class="stat-label">
-          Entregado
-        </div>
-
-        <div class="stat-value">
-          ${entregados.length}
-        </div>
-
-      </div>
-
-
-      <div class="card stat-card">
-
-        <div class="stat-label">
-          Saldo pendiente
-        </div>
-
-        <div class="stat-value">
-          ${money(saldoPendiente)}
-        </div>
-
-      </div>
-
-    </div>
+          </div>
+        `
+        : ""
+    }
 
 
     <!-- =====================================
