@@ -775,12 +775,7 @@ async function verApartado(id) {
             </div>
 
 
-            <div class="total-border">
-
-              Total:
-              ${money(apartado.total)}
-
-            </div>
+          
 
           </div>
 
