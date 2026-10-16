@@ -1258,19 +1258,31 @@ async function eliminarEmpleado(empleadoId, nombreEmpleado) {
   }
 
   const { data, error } = await supabaseClient.functions.invoke(
-    "eliminar-empleado",
-    {
-      body: {
-        empleadoId,
-        password,
-      },
-    }
+  "eliminar-empleado",
+  {
+    body: {
+      empleadoId,
+      password,
+    },
+  }
+);
+
+  
+if (error || !data?.ok) {
+  console.error("Error al eliminar empleado:", {
+    error,
+    data
+  });
+
+  toast(
+    data?.error ||
+    error?.message ||
+    "No se pudo eliminar el empleado. Revisa la consola."
   );
 
-  if (error || !data?.ok) {
-    toast(data?.error || "No se pudo eliminar el empleado.");
-    return;
-  }
+  return;
+}
+
 
   toast("Empleado eliminado correctamente.");
   await renderView("configuracion");
