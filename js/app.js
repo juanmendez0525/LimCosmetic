@@ -831,15 +831,25 @@ async function renderConfiguracion() {
                   </tr>
                 </thead>
 
+                                
                 <tbody>
                   ${lista.map(empleado => `
                     <tr>
                       <td>${escapar(empleado.nombre || "Sin nombre")}</td>
                       <td>${escapar(empleado.identificacion || "—")}</td>
                       <td>Empleado</td>
+                      <td>
+                        <button
+                          class="danger-btn"
+                          onclick="eliminarEmpleado('${escapar(empleado.id)}', '${escapar(empleado.nombre || "Sin nombre")}')"
+                        >
+                          Eliminar
+                        </button>
+                      </td>
                     </tr>
                   `).join("")}
                 </tbody>
+
               </table>
             </div>
           `
@@ -1227,6 +1237,43 @@ async function guardarEmpleado() {
       "Ocurrió un error al crear el empleado."
     );
   }
+}
+
+async function eliminarEmpleado(empleadoId, nombreEmpleado) {
+  const confirmado = confirm(
+    `¿Estás seguro de que deseas eliminar a "${nombreEmpleado}"? Esta acción no se puede deshacer.`
+  );
+
+  if (!confirmado) return;
+
+  const password = prompt(
+    "Por seguridad, escribe la contraseña de tu cuenta de administrador:"
+  );
+
+  if (password === null) return;
+
+  if (!password.trim()) {
+    toast("Debes escribir la contraseña del administrador.");
+    return;
+  }
+
+  const { data, error } = await supabaseClient.functions.invoke(
+    "eliminar-empleado",
+    {
+      body: {
+        empleadoId,
+        password,
+      },
+    }
+  );
+
+  if (error || !data?.ok) {
+    toast(data?.error || "No se pudo eliminar el empleado.");
+    return;
+  }
+
+  toast("Empleado eliminado correctamente.");
+  await renderView("configuracion");
 }
 
 function configurarSidebarRetractil() {
