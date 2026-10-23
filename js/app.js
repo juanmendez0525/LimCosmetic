@@ -93,8 +93,8 @@ function renderView(view="inicio") {
     return;
   }
 
-  // El empleado solamente puede acceder a:
-  // inicio, ventas, inventario y apartados.
+  // El empleado solamente puede acceder a estas vistas.
+  // Esta validación también bloquea intentos de navegación directa.
   const vistasEmpleado = [
     "inicio",
     "ventas",
@@ -201,27 +201,22 @@ function configurarMenuPorRol() {
   }
 
   
-  const vistasAdministrativas = [
-    "inventario",
-    "clientes",
-    "historial",
-    "reportes",
-    "configuracion"
+  // La navegación visible de los empleados se limita a Inicio,
+  // Ventas y Apartados, tanto en escritorio como en móvil.
+  const vistasEmpleado = [
+    "inicio",
+    "ventas",
+    "apartados"
   ];
 
-  document.querySelectorAll(
-    "#sideNav [data-view]"
-  ).forEach(button => {
-
+  document.querySelectorAll("[data-view]").forEach(button => {
     const vista = button.dataset.view;
 
-    if (
-      rol === "empleado" &&
-      vistasAdministrativas.includes(vista)
-    ) {
-      button.style.display = "none";
+    if (rol === "empleado") {
+      button.style.display = vistasEmpleado.includes(vista) ? "" : "none";
+    } else {
+      button.style.display = "";
     }
-
   });
 
   // ==========================================
