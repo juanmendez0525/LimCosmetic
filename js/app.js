@@ -700,12 +700,7 @@ async function renderInicio() {
             ⚠️ Stock bajo
           </h2>
 
-          <button
-            class="secondary-btn"
-            onclick="renderView('inventario')"
-          >
-            Inventario
-          </button>
+          ${esAdmin ? '<button class="secondary-btn" onclick="renderView(\'inventario\')">Inventario</button>' : ""}
 
         </div>
 
